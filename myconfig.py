@@ -82,11 +82,11 @@ PWM_STEERING_THROTTLE = {
     "PWM_THROTTLE_PIN": "PCA9685.1:40.0",   # PWM output pin for ESC
     "PWM_THROTTLE_SCALE": 1.0,              # used to compensate for PWM frequence differences from 60hz; NOT for increasing/limiting speed
     "PWM_THROTTLE_INVERTED": False,         # True if hardware requires an inverted PWM pulse
-    "STEERING_LEFT_PWM": 550,               #pwm value for full left steering
-    "STEERING_RIGHT_PWM": 250,              #pwm value for full right steering
-    "THROTTLE_FORWARD_PWM": 400,            #pwm value for max forward throttle
+    "STEERING_LEFT_PWM": 490,               #pwm value for full left steering
+    "STEERING_RIGHT_PWM": 300,              #pwm value for full right steering
+    "THROTTLE_FORWARD_PWM": 390,            #pwm value for max forward throttle
     "THROTTLE_STOPPED_PWM": 330,            #pwm value for no movement
-    "THROTTLE_REVERSE_PWM": 280,            #pwm value for max reverse throttle
+    "THROTTLE_REVERSE_PWM": 310,            #pwm value for max reverse throttle
 }
 # 
 # #
@@ -724,7 +724,7 @@ AUTO_CREATE_NEW_TUB = True     #create a new tub (tub_YY_MM_DD) directory when r
 # AI_LAUNCH_KEEP_ENABLED = False      # when False ( default) you will need to hit the AI_LAUNCH_ENABLE_BUTTON for each use. This is safest. When this True, is active on each trip into "local" ai mode.
 # 
 # #Scale the output of the throttle of the ai pilot for all model types.
-# AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
+AI_THROTTLE_MULT = 0.962             # this multiplier will scale every throttle value for all output from NN models
 # 
 # #Path following
 # PATH_FILENAME = "donkey_path.pkl"   # the path will be saved to this filename
@@ -746,7 +746,7 @@ AUTO_CREATE_NEW_TUB = True     #create a new tub (tub_YY_MM_DD) directory when r
 # REALSENSE_D435_ID = None        # serial number of camera or None if you only have one camera (it will autodetect)
 # 
 # # Stop Sign Detector
-# STOP_SIGN_DETECTOR = False
+# STOP_SIGN_DETECTOR = True
 # STOP_SIGN_MIN_SCORE = 0.2
 # STOP_SIGN_SHOW_BOUNDING_BOX = True
 # STOP_SIGN_MAX_REVERSE_COUNT = 10    # How many times should the car reverse when detected a stop sign, set to 0 to disable reversing

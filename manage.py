@@ -43,6 +43,7 @@ from donkeycar.parts.transform import Lambda
 from donkeycar.parts.pipe import Pipe
 from donkeycar.utils import *
 
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -97,12 +98,10 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     #
     add_odometry(V, cfg)
 
-
     #
     # setup primary camera
     #
     add_camera(V, cfg, camera_type)
-
 
     # add lidar
     if cfg.USE_LIDAR:
@@ -466,7 +465,6 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     # Setup drivetrain
     #
     add_drivetrain(V, cfg)
-
 
     #
     # OLED display setup
@@ -931,7 +929,7 @@ def add_drivetrain(V, cfg):
         from donkeycar.parts.actuator import TwoWheelSteeringThrottle
 
         #
-        # To make differential drive steer,
+        # To make differentisal drive steer,
         # divide throttle between motors based on the steering value
         #
         is_differential_drive = cfg.DRIVE_TRAIN_TYPE.startswith("DC_TWO_WHEEL")
