@@ -11,15 +11,15 @@ def detect_stop_line(image):
     # 設定ROI，只關注畫面下方30%
     # roi = image[int(image.shape[0] * 0.3):, :]
     height = image.shape[0]
-    roi_start = int(height * 0.7)
+    roi_start = int(height * 0.63)
     roi = image[roi_start:, :]
     
     # 將影像轉換為HSV
     hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
     
     # 定義白色的HSV範圍
-    lower_white = np.array([0, 0, 200])
-    upper_white = np.array([180, 30, 255])
+    lower_white = np.array([0, 0, 205])
+    upper_white = np.array([180, 25, 255])
     
     # 篩選出白色區域
     mask = cv2.inRange(hsv, lower_white, upper_white)
@@ -28,11 +28,11 @@ def detect_stop_line(image):
     edged = cv2.Canny(mask, 50, 150)
 
     # # 使用形態學操作去除小的噪點
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (4, 4))
     closed = cv2.morphologyEx(edged, cv2.MORPH_CLOSE, kernel)
 
     # 尋找影像中的線條
-    lines = cv2.HoughLinesP(closed, 1, np.pi/180, 50, maxLineGap=50)
+    lines = cv2.HoughLinesP(closed, 1, np.pi/180, 40, minLineLength=30, maxLineGap=10)
     
     stop_line_detected = False
     if lines is not None:
@@ -48,7 +48,7 @@ def detect_stop_line(image):
                 cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 count+=1
                 # 檢測到白色橫線
-                if -3 <= angle <= 3:  # 檢查是否為橫線並且位於畫面下方
+                if -3 <= angle <= 3 and (x2 - x1) >= 43:  # 檢查是否為橫線並且位於畫面下方
                     print(f"Line: ({x1}, {y1}) -> ({x2}, {y2}), Angle: {angle}")
                     if count >= 2:
                         stop_line_detected = True

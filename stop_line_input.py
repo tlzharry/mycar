@@ -23,15 +23,20 @@ class StopLineDetector:
     def process_image(self, image):
         # 設定ROI，只關注畫面下方30%
         height = image.shape[0]
-        roi_start = int(height * 0.7)
+        # 新設定
+        roi_start = int(height * 0.63)
+        # roi_start = int(height * 0.7)
         roi = image[roi_start:, :]
 
         # 將影像轉換為HSV
         hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
         # 定義白色的HSV範圍
-        lower_white = np.array([0, 0, 200])
-        upper_white = np.array([180, 30, 255])
+        # 新設定
+        lower_white = np.array([0, 0, 210])
+        upper_white = np.array([180, 28, 255])
+        # lower_white = np.array([0, 0, 200])
+        # upper_white = np.array([180, 30, 255])
 
         # 篩選出白色區域
         mask = cv2.inRange(hsv, lower_white, upper_white)
@@ -40,11 +45,11 @@ class StopLineDetector:
         edged = cv2.Canny(mask, 50, 150)
 
         # # 使用形態學操作去除小的噪點
+        # 新設定
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
         closed = cv2.morphologyEx(edged, cv2.MORPH_CLOSE, kernel)
         # Detect lines using Hough transform
         lines = cv2.HoughLinesP(closed, 1, np.pi / 180, 40, minLineLength=30, maxLineGap=10)
-        # line_count = 0
         # file_path = '/tmp/rsu.txt'
         # file_content = self.read_file(file_path)
         stop_line_detector = False
@@ -54,23 +59,18 @@ class StopLineDetector:
                     y1 += roi_start
                     y2 += roi_start
                     angle = np.degrees(np.arctan2(y2 - y1, x2 - x1))
-                    cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                    # cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
                     # print("讀取到的紅綠燈: ", file_content)
-                    if -3 <= angle <= 3 and (x2-x1) >= 50:  # Check if the line is horizontal and (x2-x1) >= 40
+                    if -3 <= angle <= 3 and (x2-x1) >= 48:  # Check if the line is horizontal and (x2-x1) >= 40
                         stop_line_detector = True
                         # print(f"Line: ({x1}, {y1}) -> ({x2}, {y2}), Angle: {angle}, Len:{x2-x1}")
-                        # line_count += 1
-                        # if line_count >= 2:
-                            # Add your stop logic here
-                            # stop_line_detector = True
-                            # self.stop_callback()
+
         if stop_line_detector:
             # print("發現停止線")
             if self.stop_callback:
                 self.stop_callback()
         else:
-            # print("here")
             if self.resume_callback:
                 self.resume_callback()
 

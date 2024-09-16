@@ -111,6 +111,7 @@ def scp_read_file(remote_user, remote_ip, remote_path, local_path, password):
 def start_scp_thread():
     remote_user = "han"
     remote_ip = "172.20.10.5"
+    # remote_ip = "192.168.0.131"
     remote_path = "/tmp/car2.txt"
     local_path = "/tmp/car2.txt"
     password = "Tl123456789"
@@ -213,12 +214,14 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
             return obstacle_image
 
     def combine_processed_images(image_with_stop_line, image_with_obstacle):
-        combined_image = cv2.addWeighted(image_with_stop_line, 0.5, image_with_obstacle, 0.5, 0)
+        combined_image = cv2.addWeighted(image_with_stop_line, 1.0, image_with_obstacle, 1.0, 0)
         return combined_image
     
-    V.add(Lambda(run_stop_logic), inputs=['cam/image_array'], outputs=['cam/image_with_stop_line'])
-    V.add(Lambda(run_stop_obstacle), inputs=['cam/image_array'], outputs=['cam/image_with_obstacle'])
-    V.add(Lambda(combine_processed_images), inputs=['cam/image_with_stop_line', 'cam/image_with_obstacle'], outputs=['cam/image_array'])
+    V.add(Lambda(run_stop_logic), inputs=['cam/image_array'], outputs=['cam/image_array'])
+    V.add(Lambda(run_stop_obstacle), inputs=['cam/image_array'], outputs=['cam/image_array'])
+    # V.add(Lambda(run_stop_logic), inputs=['cam/image_array'], outputs=['cam/image_with_stop_line'])
+    # V.add(Lambda(run_stop_obstacle), inputs=['cam/image_array'], outputs=['cam/image_with_obstacle'])
+    # V.add(Lambda(combine_processed_images), inputs=['cam/image_with_stop_line', 'cam/image_with_obstacle'], outputs=['cam/new_image_array'])
 
     # add lidar
     if cfg.USE_LIDAR:
@@ -763,7 +766,22 @@ class DriveMode:
         self.last_print_time = 0
         self.steering_threshold = 0.75
         self.throttle_increment = 0.02
+        self.boost_active = False
+        self.boost_timer = None
         
+    def activate_boost(self):
+        if not self.boost_active:
+            self.boost_active = True
+            # 油門增加值
+            self.throttle_increment = 0.03
+            # 持續秒數
+            self.boost_timer = threading.Timer(0.2, self.deactivate_boost)
+            self.boost_timer.start()
+
+    def deactivate_boost(self):
+        self.boost_active = False
+        self.throttle_increment = 0.02
+
     def run(self, mode,
             user_steering, user_throttle,
             pilot_steering, pilot_throttle):
@@ -779,8 +797,8 @@ class DriveMode:
         """
         current_time = time.time()
 
-        # 每秒印出一次訊息
-        if current_time - self.last_print_time >= 1:
+        # 每0.3秒印出一次訊息
+        if current_time - self.last_print_time >= 0.3:
             print(f"rsu_signal:{drive_mode_instance.stop_rsu_signal}, stop_signal:{drive_mode_instance.stop_signal}, car2.txt:{car2_content}")
             self.last_print_time = current_time
         
@@ -796,7 +814,11 @@ class DriveMode:
         # 偵測到障礙物
         if drive_mode_instance.stop_obstacle_signal:
             return self.last_steering, 0.0
-        
+
+        # 綠燈起步
+        if not drive_mode_instance.stop_rsu_signal and drive_mode_instance.stop_signal:
+            self.activate_boost()
+
         if mode == 'user':
             return user_steering, user_throttle
         
@@ -805,13 +827,15 @@ class DriveMode:
             self.last_steering = pilot_steering if pilot_steering else 0.0
 
             # 減少增加油門比例，降低暴衝風險
-            if user_throttle >= 0.49:
+            if user_throttle >= 0.54:
+                self.ai_throttle_mult = 0.885
+            elif user_throttle >= 0.49 and user_throttle < 0.54:
                 self.ai_throttle_mult = 0.913
             else:
                 self.ai_throttle_mult = 0.9612
 
             # 轉向大於一定的值就增加油門值，避免卡在彎道中
-            if abs(self.last_steering) > self.steering_threshold:
+            if abs(self.last_steering) > self.steering_threshold or self.boost_active:
                 adjusted_throttle = (user_throttle * self.ai_throttle_mult) + self.throttle_increment
             else:
                 adjusted_throttle = (user_throttle * self.ai_throttle_mult)
@@ -820,6 +844,7 @@ class DriveMode:
             adjusted_throttle = min(adjusted_throttle, 1.0)
 
             # if current_time - self.last_print_time >= 0.5:
+            #     print(f'throttle:{adjusted_throttle}')
             #     print(f'steering:{self.last_steering}, throttle:{adjusted_throttle}, ai_throttle:{self.ai_throttle_mult}')
 
             return pilot_steering if pilot_steering else 0.0, adjusted_throttle

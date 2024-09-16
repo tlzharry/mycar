@@ -63,9 +63,9 @@ class StopObstacle:
 
         # 在裁剪圖像上繪製白線
         if lines is not None:
-            for line in lines:
-                for x1, y1, x2, y2 in line:
-                    cv2.line(cropped_image, (x1, y1), (x2, y2), (190, 190, 190), 2)
+            # for line in lines:
+            #     for x1, y1, x2, y2 in line:
+                    # cv2.line(cropped_image, (x1, y1), (x2, y2), (190, 190, 190), 2)
         
 
             # 找出所有紅線的x和y座標
@@ -119,7 +119,7 @@ class StopObstacle:
                 # print(f"輪廓編號: 1, 輪廓大小: {largest_contour_area}")
                 
                 # 繪製最大的輪廓
-                cv2.drawContours(new_cropped_image, [largest_contour], -1, (0, 255, 0), 2)
+                # cv2.drawContours(new_cropped_image, [largest_contour], -1, (0, 255, 0), 2)
                 
 
                 # 計算最大的輪廓的中心
@@ -137,7 +137,7 @@ class StopObstacle:
                 # print(f"輪廓編號: 1, 輪廓大小: {largest_contour_area}")
 
                 # 繪製編號
-                cv2.putText(new_cropped_image, "1", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                # cv2.putText(new_cropped_image, "1", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
                 in_lane = self.point_in_polygon(cX, cY, lane_polygon)
                 if largest_contour_area > 300 and distance < 40:
                     # print(f"車道中心點與輪廓中心點之間的距離: {distance}")

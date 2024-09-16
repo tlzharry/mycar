@@ -20,7 +20,7 @@ class StopRsuSign:
             except FileNotFoundError:
                 # 處理檔案不存在的情況
                 self.rsu_value = 'G'  # 預設為綠燈
-            time.sleep(1)
+            time.sleep(0.3)
 
     def run(self):
         # 獲取目前的 RSU 內容
