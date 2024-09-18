@@ -44,7 +44,7 @@ from donkeycar.parts.pipe import Pipe
 from donkeycar.utils import *
 
 from stop_line_input import StopLineDetector
-from stop_obstacle_4 import StopObstacle
+# from stop_obstacle_4 import StopObstacle
 from stop_rsu_sign import StopRsuSign
 import threading
 import pexpect
@@ -59,7 +59,7 @@ class DriveModeInstance:
         self.stop_signal = False
         self.stop_rsu_signal = False
         self.stop_detected_time = None
-        self.stop_obstacle_signal = False
+        # self.stop_obstacle_signal = False
 
 drive_mode_instance = DriveModeInstance()
 def stop_vehicle():
@@ -75,11 +75,11 @@ def stop_rsu_vehicle():
 def resume_rsu_vehicle():
     drive_mode_instance.stop_rsu_signal = False
 
-def stop_obstacle_vehicle():
-    drive_mode_instance.stop_obstacle_signal = True
+# def stop_obstacle_vehicle():
+#     drive_mode_instance.stop_obstacle_signal = True
 
-def resume_obstacle_vehicle():
-    drive_mode_instance.stop_obstacle_signal = False
+# def resume_obstacle_vehicle():
+#     drive_mode_instance.stop_obstacle_signal = False
 
 def write_file(text):
     file_path = '/tmp/car1.txt'
@@ -172,7 +172,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     add_odometry(V, cfg)
 
     stop_line_detector = StopLineDetector(stop_callback=stop_vehicle, resume_callback=resume_vehicle)
-    stop_obstacle = StopObstacle(stop_callback=stop_obstacle_vehicle, resume_callback=resume_obstacle_vehicle)
+    # stop_obstacle = StopObstacle(stop_callback=stop_obstacle_vehicle, resume_callback=resume_obstacle_vehicle)
     stop_rsu_sign = StopRsuSign(stop_callback=stop_rsu_vehicle, resume_callback=resume_rsu_vehicle)
 
     #
@@ -206,19 +206,19 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     #         processed_image = stop_line_detector.process_image(image)
     #         return processed_images
 
-    def run_stop_obstacle(image):
-        if drive_mode_instance.stop_obstacle_signal:
-            return image
-        else:
-            obstacle_image = stop_obstacle.stop_obstacle_image(image)
-            return obstacle_image
+    # def run_stop_obstacle(image):
+    #     if drive_mode_instance.stop_obstacle_signal:
+    #         return image
+    #     else:
+    #         obstacle_image = stop_obstacle.stop_obstacle_image(image)
+    #         return obstacle_image
 
-    def combine_processed_images(image_with_stop_line, image_with_obstacle):
-        combined_image = cv2.addWeighted(image_with_stop_line, 1.0, image_with_obstacle, 1.0, 0)
-        return combined_image
+    # def combine_processed_images(image_with_stop_line, image_with_obstacle):
+    #     combined_image = cv2.addWeighted(image_with_stop_line, 1.0, image_with_obstacle, 1.0, 0)
+    #     return combined_image
     
     V.add(Lambda(run_stop_logic), inputs=['cam/image_array'], outputs=['cam/image_array'])
-    V.add(Lambda(run_stop_obstacle), inputs=['cam/image_array'], outputs=['cam/image_array'])
+    # V.add(Lambda(run_stop_obstacle), inputs=['cam/image_array'], outputs=['cam/image_array'])
     # V.add(Lambda(run_stop_logic), inputs=['cam/image_array'], outputs=['cam/image_with_stop_line'])
     # V.add(Lambda(run_stop_obstacle), inputs=['cam/image_array'], outputs=['cam/image_with_obstacle'])
     # V.add(Lambda(combine_processed_images), inputs=['cam/image_with_stop_line', 'cam/image_with_obstacle'], outputs=['cam/new_image_array'])
@@ -761,7 +761,7 @@ class DriveMode:
         self.ai_throttle_mult = ai_throttle_mult
         self.stop_signal = False
         self.stop_rsu_signal = False
-        self.stop_obstacle_signal = False
+        # self.stop_obstacle_signal = False
         self.last_steering = 0.0
         self.last_print_time = 0
         self.steering_threshold = 0.75
@@ -803,8 +803,8 @@ class DriveMode:
             self.last_print_time = current_time
         
         # 臨車訊息不等於1和偵測到障礙物
-        if car2_content != '1' and drive_mode_instance.stop_obstacle_signal:
-            return self.last_steering, 0.0
+        # if car2_content != '1' and drive_mode_instance.stop_obstacle_signal:
+        #     return self.last_steering, 0.0
         
         # 偵測到停止線和紅燈
         if drive_mode_instance.stop_signal and drive_mode_instance.stop_rsu_signal:
@@ -812,8 +812,8 @@ class DriveMode:
             return self.last_steering, 0.0
         
         # 偵測到障礙物
-        if drive_mode_instance.stop_obstacle_signal:
-            return self.last_steering, 0.0
+        # if drive_mode_instance.stop_obstacle_signal:
+        #     return self.last_steering, 0.0
 
         # 綠燈起步
         if not drive_mode_instance.stop_rsu_signal and drive_mode_instance.stop_signal:
